@@ -620,18 +620,52 @@ def main():
             mime="application/zip",
             help="Une courbe 3D .sldcrv par station (mm), déjà vrillée et placée le long de Z.",
         )
-        st.markdown(
-            """
-**SolidWorks (plans + esquisses, sans volume)**  
-1. Télécharge le `.swb`  
-2. Dans SolidWorks : **Outils → Macro → Exécuter** → choisis le fichier  
-3. Une pièce s’ouvre : `Plan_S01`… et `Esquisse_S01`… (profil à l’échelle, vrillé, à la cote r)  
-4. Unités internes du macro : **mètres** (un modèle IUT en mm affiche 400 mm pour R = 0,40 m)  
-5. Pour solidifier : **Insertion → Bossage/Base → Lissage**, esquisses dans l’ordre S01 → bout  
+        with st.expander("Procédure SolidWorks — plans et esquisses", expanded=True):
+            st.markdown(
+                """
+### But
 
-Le ZIP `.sldcrv` est un secours : **Insertion → Courbe → Courbe par points XYZ** (coordonnées déjà en mm dans l’espace 3D).
-            """
-        )
+Obtenir une **pièce SolidWorks qui ne contient que** :
+- un **plan** par station (`Plan_S01`, `Plan_S02`, …) perpendiculaire à l’envergure ;
+- une **esquisse fermée** sur ce plan (`Esquisse_S01`, …) : le profil déjà **mis à l’échelle**, **vrillé** et posé à la cote **r**.
+
+Pas de volume : le lissage se fait **à la main** ensuite (contrôle pédagogique).
+
+### A. Préparer le fichier
+
+1. Dans Darwin, lance une évolution puis ouvre cet onglet **Pale 3D**.
+2. Clique **SolidWorks plans + esquisses (.swb)** et enregistre le fichier (ex. `NACA4412_stations.swb`).
+3. Ouvre **SolidWorks** (une pièce ou rien du tout : le macro crée une pièce neuve).
+
+### B. Lancer le macro
+
+4. Menu **Outils → Macro → Exécuter** (pas « Nouveau »).
+5. Type de fichier : **Macro SolidWorks (\\*.swb, \\*.swp)** si tu ne vois pas le `.swb`.
+6. Choisis le fichier téléchargé → **Ouvrir**.
+7. Si SolidWorks bloque : **Outils → Options → SolidWorks → Macro** → autoriser l’exécution, puis recommence.
+
+### C. Vérifier la pièce créée
+
+8. L’arbre doit montrer, dans l’ordre : `Plan_S01` + `Esquisse_S01`, puis S02, etc. jusqu’au bout de pale.
+9. **Zoom tout** : tu dois voir les profils empilés le long de Z.
+10. **Unités** : le macro travaille en **mètres**. Avec un modèle IUT en mm, un rayon R = 0,40 m s’affiche **400 mm**. Si tout est 1000 fois trop petit, le document est en mètres : **Outils → Options → Propriétés du document → Unités → MMGS**, ou échelle × 1000.
+
+Chaque esquisse est dans le **plan de la station** (Z = r), origine ≈ **quart avant** (axe de calage à 25 % de corde).
+
+### D. Faire la pale (lissage)
+
+11. **Insertion → Bossage/Base → Lissage** (Loft).
+12. Dans **Profils**, clique les esquisses **dans l’ordre** : `Esquisse_S01` (moyeu) → `Esquisse_S02` → … → dernière (bout).
+13. Coche **Fusionner les résultats** si tu veux un seul solide. Valide (coche verte).
+14. Contrôle : longueur de pale ≈ **R − rayon moyeu** (défaut 400 − 50 = **350 mm**).
+
+### Si le macro refuse de partir (plan B)
+
+15. Télécharge **Courbes stations .sldcrv (zip)** et décompresse.
+16. **Insertion → Courbe → Courbe par points XYZ** (ou glisser un `.sldcrv` dans la zone graphique).
+17. Un fichier = une station, coordonnées **déjà en mm** dans l’espace 3D. Ensuite lissage sur ces courbes, ou projette chaque courbe sur un plan pour retrouver des esquisses 2D.
+                """
+            )
         st.markdown(
             """
 - **r** : distance à l’axe (moyeu → bout)
@@ -695,6 +729,15 @@ Le ZIP `.sldcrv` est un secours : **Insertion → Courbe → Courbe par points X
 Aéro : [NeuralFoil](https://github.com/peterdsharpe/NeuralFoil) (Peter Sharpe, MIT), entraîné sur des millions de polaires XFOIL.
 La pale 3D utilise les formules de **Schmitz** :  
 φ = (2/3) arctan(1/λ_r),  c = 8π r (1−cos φ) / (B Cl),  β = φ − α_design.
+
+### Procédure SolidWorks (rappel)
+
+1. Onglet **Pale 3D** → télécharger **SolidWorks plans + esquisses (.swb)**.
+2. SolidWorks : **Outils → Macro → Exécuter** → le `.swb` (autoriser les macros si demandé).
+3. Contrôler l’arbre : `Plan_S01` + `Esquisse_S01`, puis S02… (profils vrillés, à l’échelle, à la cote r).
+4. Unités : API en **mètres** → en MMGS, R = 0,40 m s’affiche **400 mm**.
+5. **Insertion → Bossage/Base → Lissage**, profils dans l’ordre S01 (moyeu) → bout.
+6. Plan B : ZIP `.sldcrv` → **Insertion → Courbe → Courbe par points XYZ** (mm, déjà placées en 3D).
 
 ### Mini-glossaire
 
