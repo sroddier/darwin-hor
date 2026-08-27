@@ -642,7 +642,8 @@ Pas de volume : le lissage se fait **à la main** ensuite (contrôle pédagogiqu
 4. Menu **Outils → Macro → Exécuter** (pas « Nouveau »).
 5. Type de fichier : **Macro SolidWorks (\\*.swb, \\*.swp)** si tu ne vois pas le `.swb`.
 6. Choisis le fichier téléchargé → **Ouvrir**.
-7. Si SolidWorks bloque : **Outils → Options → SolidWorks → Macro** → autoriser l’exécution, puis recommence.
+7. Si SolidWorks bloque : **Outils → Options → SolidWorks → Macro** → autoriser l’exécution, puis recommence.  
+   Message **« procédure trop grande »** : c’est un ancien `.swb` (tout dans un seul `Sub`). **Re-télécharge** le fichier Darwin (une procédure par station) et relance.
 
 ### C. Vérifier la pièce créée
 

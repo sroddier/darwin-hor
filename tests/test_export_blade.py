@@ -68,6 +68,9 @@ def test_solidworks_macro_one_plane_and_sketch_per_station():
     assert "Esquisse_S06" in macro
     assert "0.05000000" in macro
     assert "Sub main()" in macro
+    assert "Sub DrawStation_01" in macro
+    assert "Sub DrawStation_06" in macro
+    assert macro.split("Sub main()")[1].split("End Sub")[0].count("CreateLine") == 0
     zip_bytes = stations_sldcrv_zip(blade)
     assert zip_bytes[:2] == b"PK"
     import io
