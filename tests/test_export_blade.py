@@ -2,7 +2,14 @@ import numpy as np
 
 from darwin_hor.blade import blade_stl, loft_blade, schmitz_stations
 from darwin_hor.config import BladeConfig
-from darwin_hor.export import airfoil_dat, airfoil_dxf, airfoil_sldcrv, airfoil_svg
+from darwin_hor.export import (
+    airfoil_dat,
+    airfoil_dxf,
+    airfoil_sldcrv,
+    airfoil_svg,
+    stations_sldcrv_zip,
+    stations_solidworks_macro,
+)
 from darwin_hor.geometry import naca4_coordinates
 
 
@@ -48,3 +55,27 @@ def test_stl_has_facets():
     assert blade.faces.shape[0] > 10
     assert blade.vertices.shape[1] == 3
     np.testing.assert_array_less(np.abs(blade.vertices[:, 2].min() - cfg.hub_radius_m), 1e-9)
+
+
+def test_solidworks_macro_one_plane_and_sketch_per_station():
+    cfg = BladeConfig(n_stations=6, n_airfoil_points=20, hub_radius_m=0.05, radius_m=0.4)
+    blade = loft_blade(FakeAirfoil(), cfg, cl=0.8, alpha_design_deg=5.0)
+    macro = stations_solidworks_macro(blade, title="NACA4412")
+    assert macro.count("InsertRefPlane") >= 6
+    assert macro.count("InsertSketch") == 12  # enter + exit per station
+    assert "NewPart" in macro
+    assert "Plan_S01" in macro
+    assert "Esquisse_S06" in macro
+    assert "0.05000000" in macro
+    assert "Sub main()" in macro
+    zip_bytes = stations_sldcrv_zip(blade)
+    assert zip_bytes[:2] == b"PK"
+    import io
+    import zipfile
+
+    with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zf:
+        names = zf.namelist()
+        assert any("station_01" in n for n in names)
+        crv = zf.read([n for n in names if n.endswith(".sldcrv")][0]).decode("ascii")
+        assert "mm " in crv
+        assert crv.splitlines()[0].endswith("mm")

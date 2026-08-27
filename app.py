@@ -14,6 +14,8 @@ from darwin_hor.export import (
     airfoil_svg,
     campaign_json,
     polar_csv,
+    stations_sldcrv_zip,
+    stations_solidworks_macro,
 )
 from darwin_hor.geometry import Individual, load_dat, naca4, parse_dat
 from darwin_hor.plots import (
@@ -591,14 +593,45 @@ def main():
         )
         st.plotly_chart(planform_figure(blade), use_container_width=True)
         st.plotly_chart(blade_3d_figure(blade), use_container_width=True)
-        b1, b2 = st.columns(2)
+        b1, b2, b3, b4 = st.columns(4)
+        stem = best.name.replace(" ", "_")
         b1.download_button(
             "Pale STL",
-            blade_stl(blade, name=best.name.replace(" ", "_")),
-            f"{best.name}_pale.stl",
+            blade_stl(blade, name=stem),
+            f"{stem}_pale.stl",
             key="dl_stl",
         )
-        b2.download_button("Stations CSV", stations_csv(blade), f"{best.name}_stations.csv", key="dl_stations")
+        b2.download_button("Stations CSV", stations_csv(blade), f"{stem}_stations.csv", key="dl_stations")
+        b3.download_button(
+            "SolidWorks plans + esquisses (.swb)",
+            stations_solidworks_macro(blade, title=stem),
+            f"{stem}_stations.swb",
+            key="dl_swb",
+            help=(
+                "Macro VBA : Outils > Macro > Exécuter dans SolidWorks. "
+                "Crée une pièce neuve avec un plan et une esquisse fermée par station, sans lissage."
+            ),
+        )
+        b4.download_button(
+            "Courbes stations .sldcrv (zip)",
+            stations_sldcrv_zip(blade),
+            f"{stem}_stations_sldcrv.zip",
+            key="dl_sldcrv_zip",
+            mime="application/zip",
+            help="Une courbe 3D .sldcrv par station (mm), déjà vrillée et placée le long de Z.",
+        )
+        st.markdown(
+            """
+**SolidWorks (plans + esquisses, sans volume)**  
+1. Télécharge le `.swb`  
+2. Dans SolidWorks : **Outils → Macro → Exécuter** → choisis le fichier  
+3. Une pièce s’ouvre : `Plan_S01`… et `Esquisse_S01`… (profil à l’échelle, vrillé, à la cote r)  
+4. Unités internes du macro : **mètres** (un modèle IUT en mm affiche 400 mm pour R = 0,40 m)  
+5. Pour solidifier : **Insertion → Bossage/Base → Lissage**, esquisses dans l’ordre S01 → bout  
+
+Le ZIP `.sldcrv` est un secours : **Insertion → Courbe → Courbe par points XYZ** (coordonnées déjà en mm dans l’espace 3D).
+            """
+        )
         st.markdown(
             """
 - **r** : distance à l’axe (moyeu → bout)
@@ -657,7 +690,7 @@ def main():
 | Croisement `%d` → ratio 0 (bug) | interpolation réelle 40–60 % |
 | Fitness = Σ \|Cl/Cd\| | moyenne pondérée par la confiance, ou mode classique |
 | Épaisseur max mal filtrée | 22 % = 22 % de corde |
-| Export `.sldcrv` 100 mm | `.sldcrv`, `.dat`, DXF, SVG, STL pale |
+| Export `.sldcrv` 100 mm | `.sldcrv`, `.dat`, DXF, SVG, STL pale, **macro SolidWorks plans+esquisses** |
 
 Aéro : [NeuralFoil](https://github.com/peterdsharpe/NeuralFoil) (Peter Sharpe, MIT), entraîné sur des millions de polaires XFOIL.
 La pale 3D utilise les formules de **Schmitz** :  
