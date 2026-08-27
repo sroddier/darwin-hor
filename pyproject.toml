@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "darwin-hor"
+version = "3.0.0"
+description = "Évolution darwinienne de profils de pale d'éolienne (NeuralFoil + Streamlit)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Stéphane Roddier" },
+]
+keywords = ["wind-turbine", "airfoil", "xfoil", "neuralfoil", "genetic-algorithm"]
+dependencies = [
+    "numpy>=1.24",
+    "neuralfoil>=0.3.0",
+    "aerosandbox>=4.2.4",
+    "streamlit>=1.32",
+    "plotly>=5.18",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4"]
+
+[project.scripts]
+darwin-hor = "darwin_hor.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["darwin_hor*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
